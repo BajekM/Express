@@ -1,13 +1,16 @@
 const express = require('express');
 const path = require('path');
 const hbs = require('express-handlebars');
+const formidable = require('express-formidable');
 
 const app = express();
+app.use(express.static(path.join(__dirname + '/public')));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(formidable());
+
 app.engine('hbs', hbs());
 app.set('view engine', 'hbs');
-
-app.use(express.static(path.join(__dirname + '/public')));
-app.use(express.urlencoded({ extended: false }));
 
 app.get('/', (req, res) => {
   res.render('index');
@@ -35,10 +38,15 @@ app.get('/history', (req, res) => {
 
 app.post('/contact/send-message', (req, res) => {
 
-  const { author, sender, title, message, image } = req.body;
+  // console.log(req.fields, req.files);
 
+  const { author, sender, title, message} = req.fields;
+  const { image } = req.files;
+
+  // console.log(image.name);
+  
   if(author && sender && title && message && image) {
-    res.render('contact', { isSent: true }, {fileName: req.params.image});
+    res.render('contact', { isSent: true, fileName: image.name });
   }
   else {
     res.render('contact', { isError: true });
